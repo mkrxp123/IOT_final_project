@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- add bootstrap 5 css file -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- add bootstrap 5 js file -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+
+    <!-- add Vue 3 js file -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- add axios js file -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<title>remind times</title>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+		<div class="container-fluid">
+            <a class="navbar-brand">device: {{d_name}}</a>
+		</div>
+	</nav>
+    <div class="container" id="app">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+			<li class="nav-item" role="presentation">
+        		<button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#Profile" type="button" role="tab" aria-controls="home" aria-selected="true">填寫時間</button>
+			</li>
+			<li class="nav-item" role="presentation">
+        		<button class="nav-link" id="Form-tab" data-bs-toggle="tab" data-bs-target="#Form" type="button" role="tab" aria-controls="Form" aria-selected="false">更改時程</button>
+			</li>
+		</ul>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="Profile" role="tabpanel" aria-labelledby="home-tab">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">行程</th>
+                        </tr>
+                    </thead>
+                    <tbody id="routine_table">
+                        <tr v-for="(timepicker, i) in timepickers" :key="i">
+                            <th scope="row">(( i + 1 ))</th>
+                            <td><input type="time" :name="'timepicker' + i" v-model="timepickers[i]" required></td>
+                        </tr>
+                    </tbody>
+                    <div>
+                        <button type="button" style="margin-left: 12px;" class="btn btn-secondary" @click="this.timepickers.push('')">增加行程</button>
+                        <button type="button" style="margin-left: 12px;" class="btn btn-warning" @click="this.timepickers.pop()">減少行程</button>
+                        <button type="button" style="margin-left: 12px;" class="btn btn-danger" @click="this.timepickers = ['']">重置</button>
+                        <button type="button" style="margin-left: 12px;" class="btn btn-primary" @click="this.send_times">送出</button>
+                    </div>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="module">
+    var app = Vue.createApp({
+        delimiters: ["((", "))"], // otherwise original delimiter of Vue would conflict with that of Jinja
+        data() {
+            return {
+                timepickers: ['']
+            }
+        },
+        
+        methods: {
+            send_times(){
+                for(var i = 0; i < this.timepickers.length; i++) {
+                    // console.log(this.timepickers[i]);
+                    if(this.timepickers[i] == ''){
+                        alert("please fill all the time slots");
+                        return
+                    }
+                }
+                let data = {
+                    "op": "create",
+                    "times": this.timepickers
+                }
+                axios.post("/send_times", data);
+            }
+        }
+    });
+    app.mount('#app');
+</script>
